@@ -1,0 +1,18 @@
+
+#Indexing already done using bowtie2, BWA and samtools: /home/prash/Data/hg38
+#All scripts and commands are to be run from Expipe
+#fastqc already one for all samples. Pl check the folder 
+bowtie2 -x /home/prash/Data/Dmel/Dmel  -1 TP_2_E1_1.fq.gz -2 TP_2_E1_2.fq.gz -S TP_2_E1.sam
+samtools import /home/prash/Data/Dmel/Dmel.fna TP_2_E1.sam TP_2_E1.bam
+samtools sort TP_2_E1.bam >TP_2_E1.sorted.bam
+samtools index TP_2_E1.sorted.bam TP_2_E1.sorted.bam.bai &
+samtools merge TP_2_E1.merged.bam TP_2_E1.sorted.*
+samtools mpileup sorted/TP_2_E1.sorted.bam > TP_2_E1.mpileup.bam 
+varscan mpileup2snp TP_2_E1.mpileup.bam > TP_2_E1.mpileup.snps &
+varscan mpileup2indel TP_2_E1.mpileup.bam > TP_2_E1.mpileup.indels 
+varscan filter TP_2_E1.mpileup.snps >TP_2_E1.mpileup.snps.filter 
+varscan readcounts TP_2_E1.mpileup.bam >TP_2_E1.mpileup.readcounts
+samtools mpileup -uf /home/prash/Data/Dmel/Dmel.fna sorted/TP_2_E1.sorted.bam | bcftools view ->TP_2_E1.raw.bcf 
+#samtools calmd -Abr TP_2_E1.mpileup.bam/Data/hg38/hg38.fa > NW.baq.bam
+bcftools view TP_2_E1.raw.bcf >TP_2_E1.vcf
+
